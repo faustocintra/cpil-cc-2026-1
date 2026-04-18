@@ -1,14 +1,19 @@
-# Código-fonte em "calculator language"
-# para análise léxica
-source : str = """
-read a
-read b
-read c
-result := (a + b) * c
-write result / 2.5
-"""
-
 import sys
+
+# Abre o arquivo para ser analisado
+def open_file() -> str:
+    if len(sys.argv) < 2:
+        print("Forma de usar: python lexer.py <nome_arquivo>")
+        print("Nenhum nome de arquivo fornecido.")
+        sys.exit(-1)
+
+    filename = sys.argv[1]
+    try:
+        with open(filename, "r", encoding="utf-8") as f:
+            return f.read()
+    except OSError as error:
+        print(error)
+        sys.exit(-1)
 
 # Caracteres considerados "em branco"
 BLANKS = {
@@ -186,7 +191,8 @@ def analyze(source: str) -> None:
 
             case 50:
                 if   is_alphanum(ch):    lexeme, state = go_to_state(ch, 50)
-                elif ch in BLANKS:       lexeme, state = accept(ch, 1001)      
+                elif ch in BLANKS:       lexeme, state = accept(ch, 1001)    
+                else:                    display_error(ch)   
 
             case 60: 
                 if   ch == "r":          lexeme, state = go_to_state(ch, 70)
@@ -227,9 +233,10 @@ def analyze(source: str) -> None:
                 if   is_digit(ch):       lexeme, state = go_to_state(ch, 120)
                 elif ch in BLANKS:       lexeme, state = accept(ch, 1004)       
                 else:                    display_error(ch)
-
+            
+            case 130:
                 if   is_digit(ch):       lexeme, state = go_to_state(ch, 130)
-                elif ch in BLANKS:       lexeme, state = accept(ch, 1004)       
+                elif ch in BLANKS:       lexeme, state = accept(ch, 1004)
                 else:                    display_error(ch)
 
             case 150:   # ":" consumed
@@ -248,4 +255,5 @@ def analyze(source: str) -> None:
 
 # Chama a função de análise ao executar o arquivo
 if __name__ == "__main__":
+    source = open_file()
     analyze(source)  
